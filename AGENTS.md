@@ -36,6 +36,14 @@ mise exec -- uv sync
 mise exec -- uv run python -m Pyjo.Prove -l -r t
 ```
 
+Perl's `prove` runs them too, with `.proverc`, under `uv run`, whose `python`
+is the one of the environment, where Pyjoyment and the reactor are installed,
+so that it needs no `PYTHONPATH`, unlike in Pyjoyment:
+
+```sh
+mise exec -- uv run prove -r t
+```
+
 The tests of Pyjoyment run on this reactor as well, with `PYJO_REACTOR`:
 
 ```sh
