@@ -1,0 +1,96 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "*"
+  schedule:
+    # Daily, as Pyjoyment, whose tests this reactor has to pass, changes more
+    # often than the reactor.
+    - cron: 37 5 * * *
+  workflow_dispatch:
+    inputs:
+      pyjoyment-ref:
+        description: The branch, tag or commit of Pyjoyment to test against
+        required: false
+        default: master
+
+permissions:
+  contents: read
+
+jobs:
+  # The whole suite of Pyjoyment on this reactor, as a reactor has to pass all
+  # of it, and the test of the reactor itself. Pyjoyment is checked out next to
+  # this repository, where `tool.uv.sources` of pyproject.toml finds it.
+  prove:
+    name: prove (python ${{ matrix.python }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python:
+          - "3.12"
+          - "3.13"
+          - "3.14"
+          - "3.15"
+          - 3.15t
+          - pypy3.12
+
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          path: Pyjo-Reactor-Twisted
+
+      - name: Checkout Pyjoyment
+        uses: actions/checkout@v7
+        with:
+          repository: dex4er/Pyjoyment
+          ref: ${{ inputs.pyjoyment-ref || 'master' }}
+          path: Pyjoyment
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          allow-prereleases: true
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.3.0
+        with:
+          version: 0.13.0 # datasource=github-releases depName=astral-sh/uv
+
+      - name: Install
+        working-directory: Pyjo-Reactor-Twisted
+        run: uv sync --python "$(command -v python)"
+
+      # As in Pyjoyment: invalid escape sequences and deprecated APIs fail, and
+      # the ResourceWarning of the development mode of Python, which only goes
+      # to the standard error, is checked in the output.
+      - name: Run the tests of the reactor
+        working-directory: Pyjo-Reactor-Twisted
+        shell: bash
+        env:
+          PYTHONDEVMODE: "1"
+          PYTHONWARNINGS: error::SyntaxWarning,error::DeprecationWarning
+        run: |
+          uv run python -m Pyjo.Prove -l --color --timeout 60 --capture-stderr -r t 2>&1 | tee prove.log
+          if grep -n 'ResourceWarning:' prove.log; then exit 1; fi
+
+      - name: Run the tests of Pyjoyment on the reactor
+        working-directory: Pyjoyment
+        shell: bash
+        env:
+          PYJO_REACTOR: Pyjo.Reactor.Twisted
+          PYTHONDEVMODE: "1"
+          PYTHONWARNINGS: error::SyntaxWarning,error::DeprecationWarning
+          TEST_ONLINE: "1"
+        run: |
+          uv run --project ../Pyjo-Reactor-Twisted python -m Pyjo.Prove -l --color -j 4 --timeout 60 --capture-stderr --stderr-lines 1000 -r t 2>&1 | tee prove.log
+          if grep -n 'ResourceWarning:' prove.log; then exit 1; fi

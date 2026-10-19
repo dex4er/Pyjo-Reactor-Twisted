@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling>=1.32.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "Pyjo-Reactor-Twisted"
+dynamic = ["version"]
+description = "Low level event reactor with Twisted support for Pyjoyment."
+readme = "README.md"
+license = "Artistic-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Piotr Roszatycki", email = "piotr.roszatycki@gmail.com" }]
+requires-python = ">=3.12"
+dependencies = ["Pyjoyment", "Twisted>=26.4.0"]
+keywords = ["pyjoyment", "reactor", "twisted"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Framework :: Twisted",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3 :: Only",
+]
+
+[project.urls]
+Homepage = "https://github.com/dex4er/Pyjo-Reactor-Twisted"
+
+# Pyjoyment of the checkout next to this one, as its revival is not on PyPI yet
+[tool.uv.sources]
+Pyjoyment = { path = "../Pyjoyment", editable = true }
+
+[tool.hatch.version]
+path = "Pyjo/Reactor/Twisted.py"
+
+# Only the module: the packages Pyjo and Pyjo.Reactor are those of Pyjoyment, whose namespace extend_path keeps open
+[tool.hatch.build.targets.wheel]
+only-include = ["Pyjo/Reactor/Twisted.py"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.format]
+quote-style = "single"
+
+# The rules of Pyjoyment, whose conventions this distribution follows.
+[tool.ruff.lint]
+select = ["B", "E4", "E7", "E9", "F", "I", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test scripts import all test functions, like `use Test::More` in Perl.
+"t/**" = [
+  # F403 "`from Pyjo.Test import *` used; unable to detect undefined names"
+  "F403",
+  # F405 "`ok` may be undefined, or defined from star imports"
+  "F405",
+]
+
+[tool.ruff.lint.isort]
+# Pyjo modules first, then the standard library, then the others, as in Pyjoyment.
+known-first-party = ["Pyjo", "Pyjoyment"]
+section-order = [
+  "future",
+  "first-party",
+  "local-folder",
+  "standard-library",
+  "third-party",
+]
+lines-between-types = 1
+lines-after-imports = 2
+
+[tool.pyright]
+typeCheckingMode = "off"
+strict = ["Pyjo/Reactor/Twisted.py"]
