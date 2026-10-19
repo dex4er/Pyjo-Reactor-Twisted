@@ -24,7 +24,8 @@ permissions:
 jobs:
   # The whole suite of Pyjoyment on this reactor, as a reactor has to pass all
   # of it, and the test of the reactor itself. Pyjoyment is checked out next to
-  # this repository, where `tool.uv.sources` of pyproject.toml finds it.
+  # this repository, and laid over the one of Git of `tool.uv.sources` of
+  # pyproject.toml with `--with-editable`, so that the checkout is what is tested.
   prove:
     name: prove (python ${{ matrix.python }})
 
@@ -80,7 +81,7 @@ jobs:
           PYTHONDEVMODE: "1"
           PYTHONWARNINGS: error::SyntaxWarning,error::DeprecationWarning
         run: |
-          uv run python -m Pyjo.Prove -l --color --timeout 60 --capture-stderr -r t 2>&1 | tee prove.log
+          uv run --with-editable ../Pyjoyment python -m Pyjo.Prove -l --color --timeout 60 --capture-stderr -r t 2>&1 | tee prove.log
           if grep -n 'ResourceWarning:' prove.log; then exit 1; fi
 
       - name: Run the tests of Pyjoyment on the reactor
@@ -92,5 +93,5 @@ jobs:
           PYTHONWARNINGS: error::SyntaxWarning,error::DeprecationWarning
           TEST_ONLINE: "1"
         run: |
-          uv run --project ../Pyjo-Reactor-Twisted python -m Pyjo.Prove -l --color -j 4 --timeout 60 --capture-stderr --stderr-lines 1000 -r t 2>&1 | tee prove.log
+          uv run --project ../Pyjo-Reactor-Twisted --with-editable . python -m Pyjo.Prove -l --color -j 4 --timeout 60 --capture-stderr --stderr-lines 1000 -r t 2>&1 | tee prove.log
           if grep -n 'ResourceWarning:' prove.log; then exit 1; fi

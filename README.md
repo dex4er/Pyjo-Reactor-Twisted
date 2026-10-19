@@ -9,8 +9,11 @@ share one event loop.
 
 ## Installation
 
+From the Git repository, as neither the reactor nor the revival of Pyjoyment
+is on PyPI yet; with uv, Pyjoyment comes from its Git repository too:
+
 ```sh
-uv add Pyjo-Reactor-Twisted
+uv add git+https://github.com/dex4er/Pyjo-Reactor-Twisted
 ```
 
 ## Usage

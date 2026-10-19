@@ -23,9 +23,10 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/dex4er/Pyjo-Reactor-Twisted"
 
-# Pyjoyment of the checkout next to this one, as its revival is not on PyPI yet
+# Pyjoyment of its Git repository, as its revival is not on PyPI yet; a path to the checkout next to this one would be a
+# subdirectory of this repository for whoever installs it from Git, as uv applies the sources of a dependency of Git
 [tool.uv.sources]
-Pyjoyment = { path = "../Pyjoyment", editable = true }
+Pyjoyment = { git = "https://github.com/dex4er/Pyjoyment" }
 
 [tool.hatch.version]
 path = "Pyjo/Reactor/Twisted.py"

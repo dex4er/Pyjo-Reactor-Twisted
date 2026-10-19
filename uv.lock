@@ -81,30 +81,14 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "pyjoyment", editable = "../Pyjoyment" },
+    { name = "pyjoyment", git = "https://github.com/dex4er/Pyjoyment" },
     { name = "twisted", specifier = ">=26.4.0" },
 ]
 
 [[package]]
 name = "pyjoyment"
 version = "0.0.2"
-source = { editable = "../Pyjoyment" }
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-servers = [
-    { name = "daphne", specifier = ">=4.2.3" },
-    { name = "granian", specifier = ">=2.8.4" },
-    { name = "gunicorn", marker = "sys_platform != 'win32'", specifier = ">=26.2.0" },
-    { name = "hypercorn", specifier = ">=0.18.0" },
-    { name = "uvicorn", specifier = ">=0.54.0" },
-    { name = "uvloop", marker = "sys_platform != 'win32'", specifier = ">=0.23.0" },
-    { name = "uwsgi", marker = "sys_platform != 'win32'", specifier = ">=2.0.30" },
-    { name = "waitress", specifier = ">=3.0.2" },
-    { name = "websockets", specifier = ">=17.2" },
-    { name = "werkzeug", specifier = ">=3.1.9" },
-]
+source = { git = "https://github.com/dex4er/Pyjoyment#46a72458bb175a40609fe07f958025556db3c5db" }
 
 [[package]]
 name = "twisted"

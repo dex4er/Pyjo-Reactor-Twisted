@@ -40,13 +40,17 @@ dependencies of another. The conventions are those of Pyjoyment: read its
 
 ## Development
 
-The distribution depends on Pyjoyment of the checkout next to this one, as the
-revival of Pyjoyment is not on PyPI yet (`[tool.uv.sources]` of
-`pyproject.toml`):
+The distribution depends on Pyjoyment of its Git repository, as the revival
+of Pyjoyment is not on PyPI yet (`[tool.uv.sources]` of `pyproject.toml`). A
+path to the checkout next to this one cannot be the source: uv applies the
+sources of a dependency of Git, so whoever installs the reactor from Git would
+get a subdirectory of this repository that does not exist. The tests lay the
+checkout next to this one over it with `--with-editable`, so that they test
+what is there:
 
 ```sh
 mise exec -- uv sync
-mise exec -- uv run python -m Pyjo.Prove -l -r t
+mise exec -- uv run --with-editable ../Pyjoyment python -m Pyjo.Prove -l -r t
 ```
 
 Perl's `prove` runs them too, with `.proverc`, under `uv run`, whose `python`
@@ -54,14 +58,14 @@ is the one of the environment, where Pyjoyment and the reactor are installed,
 so that it needs no `PYTHONPATH`, unlike in Pyjoyment:
 
 ```sh
-mise exec -- uv run prove -r t
+mise exec -- uv run --with-editable ../Pyjoyment prove -r t
 ```
 
 The tests of Pyjoyment run on this reactor as well, with `PYJO_REACTOR`:
 
 ```sh
 cd ../Pyjoyment
-PYJO_REACTOR=Pyjo.Reactor.Twisted mise exec -- uv run --project ../Pyjo-Reactor-Twisted \
+PYJO_REACTOR=Pyjo.Reactor.Twisted mise exec -- uv run --project ../Pyjo-Reactor-Twisted --with-editable . \
   python -m Pyjo.Prove -l -j 4 -r t
 ```
 
