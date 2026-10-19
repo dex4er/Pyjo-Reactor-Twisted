@@ -32,9 +32,14 @@ Pyjo.Reactor.Twisted - Low-level event reactor with Twisted support
         reactor.start()
 
 :mod:`Pyjo.Reactor.Twisted` is a low-level event reactor based on the reactor
-of `Twisted <https://twisted.org>`_, the one that ``twisted.internet.reactor``
-installs, or the one that the application installed before. ``PYJO_REACTOR``
-selects it for :mod:`Pyjo.IOLoop`::
+of `Twisted <https://twisted.org>`_, the one that the application installed
+before, or else the reactor of poll of Twisted, or of select where there is no
+poll or it does not work well, as on macOS. Its default on Linux, the reactor
+of epoll, is not installed, as epoll keeps its state in the kernel: a socket
+that is closed before it is removed leaves it, which Pyjoyment does, and the
+state is shared with the child of a fork, as a worker of
+:mod:`Pyjo.Server.Prefork`, so an application that installs it has neither.
+``PYJO_REACTOR`` selects it for :mod:`Pyjo.IOLoop`::
 
     PYJO_REACTOR=Pyjo.Reactor.Twisted
 
@@ -67,6 +72,9 @@ import Pyjo.Reactor.Poll
 
 from Pyjo.Reactor import Handle, IOCallback, TimerCallback
 
+import os
+import select
+import sys
 import threading
 import weakref
 
@@ -119,7 +127,9 @@ class Pyjo_Reactor_Twisted(Pyjo.Reactor.Poll.object):
     def __init__(self) -> None:
         global _active
         super().__init__()
-        # The reactor that the application installed, or the default one, installed by the import
+        # The reactor that the application installed, or one of poll or select, which keep their state in the process
+        if 'twisted.internet.reactor' not in sys.modules:
+            _install()
         from twisted.internet import reactor
 
         self._twisted: Any = reactor
@@ -335,8 +345,18 @@ class _Descriptor:
         self.reactor = reactor
         self.reading = self.writing = False
 
+    # The reactor of Twisted removes the handle at a hang-up or an error without data, as the refusal of a connection,
+    # where the reactor of poll calls the watcher, which finds the error of the socket, so the watcher is called as the
+    # handle was watched, readable and writable
     def connectionLost(self, reason: Any) -> None:
-        pass
+        reading, writing = self.reading, self.writing
+        self.reading = self.writing = False
+        if (reactor := self.reactor()) is None:
+            return
+        if reading:
+            reactor._fire(self.fd, False)  # pyright: ignore[reportPrivateUsage]
+        if writing and reactor._descriptors.get(self.fd) is self:  # pyright: ignore[reportPrivateUsage]
+            reactor._fire(self.fd, True)  # pyright: ignore[reportPrivateUsage]
 
     def doRead(self) -> None:
         if (reactor := self.reactor()) is not None:
@@ -353,6 +373,20 @@ class _Descriptor:
         return 'Pyjo.Reactor.Twisted'
 
 
+# The child of a fork has the waker of the parent, the pipe that wakes the reactor of Twisted from other threads, whose
+# wake-ups the parent and the child would read from each other, so the child gets one of its own
+def _after_fork_in_child() -> None:
+    if _active is None or (reactor := _active()) is None:
+        return
+    twisted = reactor._twisted  # pyright: ignore[reportPrivateUsage]
+    if (waker := getattr(twisted, 'waker', None)) is None:
+        return
+    twisted._removeInternalReader(waker)
+    waker.connectionLost(None)
+    twisted.waker = None
+    twisted.installWaker()
+
+
 def _cancel(call: Any) -> None:
     if call.active():
         call.cancel()
@@ -363,6 +397,19 @@ def _fileno(handle: Handle) -> int:
     if fd < 0:
         Pyjo.Exception.object.throw('Handle is closed')
     return fd
+
+
+# The reactor of poll, or of select where there is no poll or it does not work well, as on macOS, which Twisted itself
+# prefers to poll there, in the place of the default of Twisted, which is epoll on Linux
+def _install() -> None:
+    if sys.platform != 'darwin' and hasattr(select, 'poll'):
+        from twisted.internet import pollreactor
+
+        pollreactor.install()
+    else:
+        from twisted.internet import selectreactor
+
+        selectreactor.install()
 
 
 # The handles and the calls that an object leaves in the reactor of Twisted, at a reset and when it is freed
@@ -382,6 +429,9 @@ def _unwatch(twisted: Any, descriptor: _Descriptor) -> None:
         twisted.removeWriter(descriptor)
     descriptor.reading = descriptor.writing = False
 
+
+if hasattr(os, 'register_at_fork'):
+    os.register_at_fork(after_in_child=_after_fork_in_child)
 
 new = Pyjo_Reactor_Twisted.new
 object = Pyjo_Reactor_Twisted

@@ -21,6 +21,19 @@ dependencies of another. The conventions are those of Pyjoyment: read its
   `one_tick`, as `Pyjo.Reactor.Poll` does. While the reactor of Twisted runs,
   started by something else, both return right away, as
   `Pyjo.Reactor.Asyncio` does in a running loop of asyncio.
+- Unless the application installed a reactor of Twisted, it installs the one of
+  poll, or of select on macOS and where there is no poll, not epoll, the
+  default of Twisted on Linux: epoll keeps its state in the kernel, which drops
+  a socket that Pyjoyment closes before it removes it, so that the removal
+  fails and Twisted keeps the number of the descriptor for the next socket,
+  and which the child of a fork, as a worker of `Pyjo.Server.Prefork`, shares
+  with its parent. The child gets a waker of its own.
+- The reactor of Twisted removes a handle at a hang-up or an error without
+  data, as a refused connection, and tells only `connectionLost`, where the
+  reactor of poll calls the watcher, which finds the error of the socket and
+  tries the next address, so `connectionLost` calls the watcher as the handle
+  was watched. macOS hides both, as the reactor of select reports such a socket
+  as writable: CI runs on Linux.
 - The callbacks that the reactor of Twisted keeps refer to the object weakly,
   as the reactor of Twisted lives as long as the process; a finalizer removes
   the descriptors and cancels the calls of an object that is freed.
