@@ -92,6 +92,6 @@ jobs:
           PYTHONDEVMODE: "1"
           PYTHONWARNINGS: error::SyntaxWarning,error::DeprecationWarning
           TEST_ONLINE: "1"
-        run: |
+        run: |-
           uv run --project ../Pyjo-Reactor-Twisted --with-editable . python -m Pyjo.Prove -l --color -j 4 --timeout 60 --capture-stderr --stderr-lines 1000 -r t 2>&1 | tee prove.log
           if grep -n 'ResourceWarning:' prove.log; then exit 1; fi

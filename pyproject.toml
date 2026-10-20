@@ -35,6 +35,10 @@ path = "Pyjo/Reactor/Twisted.py"
 [tool.hatch.build.targets.wheel]
 only-include = ["Pyjo/Reactor/Twisted.py"]
 
+# The files of the distribution, as in Pyjoyment, and not the files of the tools, as .trunk
+[tool.hatch.build.targets.sdist]
+include = ["/Pyjo", "/t", "/examples", "/.proverc", "/LICENSE", "/README.md"]
+
 [tool.ruff]
 line-length = 120
 target-version = "py312"
@@ -68,6 +72,9 @@ section-order = [
 lines-between-types = 1
 lines-after-imports = 2
 
+# The environment of uv sync, where Pyjoyment and Twisted are, for pyright of Trunk too
 [tool.pyright]
+venvPath = "."
+venv = ".venv"
 typeCheckingMode = "off"
 strict = ["Pyjo/Reactor/Twisted.py"]
