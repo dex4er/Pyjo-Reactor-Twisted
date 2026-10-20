@@ -69,6 +69,19 @@ PYJO_REACTOR=Pyjo.Reactor.Twisted mise exec -- uv run --project ../Pyjo-Reactor-
   python -m Pyjo.Prove -l -j 4 -r t
 ```
 
+Trunk checks the files with the linters of Pyjoyment, from `.trunk/trunk.yaml`:
+
+```sh
+trunk check --all
+```
+
+Its pyright needs the environment of `uv sync`, `.venv`, which `tool.pyright` of
+`pyproject.toml` names, as the reactor imports Pyjoyment and Twisted, while
+Pyjoyment has no dependencies to find; Trunk Check of CI runs `uv sync` first.
+The examples and the tests are not checked by pyright: for them it takes the
+regular package `Pyjo` of Pyjoyment, which hides `Pyjo.Reactor.Twisted` of the
+checkout.
+
 `t/Reactor_Twisted.py` is the port of `t/mojo/reactor_ev.t` of Mojolicious
 9.49, from `t/Pyjo/Reactor_Poll.py` of Pyjoyment, with the differences of
 `reactor_ev.t`.
