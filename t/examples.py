@@ -93,4 +93,14 @@ with subtest('user_agent_twisted.py'), tempfile.TemporaryDirectory() as dir:
     ok(lines.count('200 Hello from Twisted!') >= 2, 'the timer requests the application of Twisted every second')
     is_ok(process.returncode, 0, 'stopped by INT')
 
+# As the workflow Build runs it with the wheel: its server listens on a port that the system picks, so it needs no free
+# port of the tests
+with subtest('loopback_twisted.py'):
+    result = subprocess.run(
+        [sys.executable, os.path.join(EXAMPLES, 'loopback_twisted.py')], capture_output=True, text=True, timeout=60
+    )
+    is_ok(result.stdout, 'Pyjo_Reactor_Twisted\n200 Your Pyjo is working!\n', 'the response on the reactor of Twisted')
+    is_ok(result.stderr, '', 'nothing on the standard error')
+    is_ok(result.returncode, 0, 'the server and the user agent closed at the end')
+
 done_testing()

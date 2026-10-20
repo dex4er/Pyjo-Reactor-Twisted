@@ -2,8 +2,9 @@ name: Build
 
 # Checks that uv.lock matches pyproject.toml, builds the sdist and the wheel,
 # checks that the wheel has the module of the reactor and nothing of the
-# namespace of Pyjoyment, and installs it with Pyjoyment and imports it
-# outside the checkout.
+# namespace of Pyjoyment, and installs it with Pyjoyment and imports it and
+# runs examples/loopback_twisted.py, a request to a server of its own on the
+# reactor of Twisted, outside the checkout.
 on:
   push:
     branches:
@@ -50,10 +51,18 @@ jobs:
       # The wheel in an environment of its own, outside the checkout, so that
       # nothing comes from it. tool.uv.sources applies only in the project,
       # so Pyjoyment comes from its Git repository explicitly.
-      - name: Install and import the wheel
+      # The first line of the example is the class of the reactor, so that
+      # Pyjo.Reactor.Poll in its place fails the step.
+      - name: Install and run the wheel
         shell: bash
         run: |-
           uv venv --python "$(command -v python)" "$RUNNER_TEMP/venv"
           uv pip install --python "$RUNNER_TEMP/venv/bin/python" git+https://github.com/dex4er/Pyjoyment dist/*.whl
+          cp examples/loopback_twisted.py "$RUNNER_TEMP/"
           cd "$RUNNER_TEMP"
           venv/bin/python -c 'import Pyjo.Reactor.Twisted; print(Pyjo.Reactor.Twisted.__version__)'
+          venv/bin/python loopback_twisted.py | tee loopback.txt
+          diff - loopback.txt <<'EOF'
+          Pyjo_Reactor_Twisted
+          200 Your Pyjo is working!
+          EOF
