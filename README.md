@@ -29,6 +29,21 @@ it at a time; the others get `Pyjo.Reactor.Poll`. When the reactor of Twisted
 is running already, as under `twistd` or Scrapy, `Pyjo.IOLoop.start()` returns
 right away and the events are handled by the reactor that runs.
 
+## Examples
+
+`examples/hello_world_twisted.py` runs `Pyjo.HelloWorld` on the server of
+Pyjoyment in the event loop that Twisted runs, with `reactor.run()`, in a
+`with` block, which closes the listen sockets of the server at its end.
+
+`examples/user_agent_twisted.py` is an application of Twisted, a server of
+`twisted.web`, whose timer requests it every second with the user agent of
+Pyjoyment, without blocking the reactor of Twisted. The user agent is in a
+`with` block, which closes its connections at its end, so the callback shows
+the error of a request that it interrupts.
+
+Both call `Pyjo.Reactor.Twisted.install()` before they import Twisted, which
+would install its default, epoll on Linux, in the place of poll or select.
+
 ## Status
 
 An experiment: the first reactor of Pyjoyment in a distribution of its own.

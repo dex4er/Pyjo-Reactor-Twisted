@@ -39,6 +39,8 @@ of epoll, is not installed, as epoll keeps its state in the kernel: a socket
 that is closed before it is removed leaves it, which Pyjoyment does, and the
 state is shared with the child of a fork, as a worker of
 :mod:`Pyjo.Server.Prefork`, so an application that installs it has neither.
+An application of Twisted that imports ``twisted.internet.reactor`` itself
+calls :func:`install` before, which installs the one of poll or select.
 ``PYJO_REACTOR`` selects it for :mod:`Pyjo.IOLoop`::
 
     PYJO_REACTOR=Pyjo.Reactor.Twisted
@@ -128,8 +130,7 @@ class Pyjo_Reactor_Twisted(Pyjo.Reactor.Poll.object):
         global _active
         super().__init__()
         # The reactor that the application installed, or one of poll or select, which keep their state in the process
-        if 'twisted.internet.reactor' not in sys.modules:
-            _install()
+        install()
         from twisted.internet import reactor
 
         self._twisted: Any = reactor
@@ -401,7 +402,26 @@ def _fileno(handle: Handle) -> int:
 
 # The reactor of poll, or of select where there is no poll or it does not work well, as on macOS, which Twisted itself
 # prefers to poll there, in the place of the default of Twisted, which is epoll on Linux
-def _install() -> None:
+def install() -> None:
+    """::
+
+        Pyjo.Reactor.Twisted.install()
+
+    Install the reactor of Twisted that :mod:`Pyjo.Reactor.Twisted` prefers,
+    of poll, or of select where there is no poll or it does not work well, as
+    on macOS, in the place of the default of Twisted, epoll on Linux. An
+    application of Twisted calls it before it imports
+    ``twisted.internet.reactor``, which installs the default. It does nothing
+    where a reactor of Twisted is installed already. ::
+
+        import Pyjo.Reactor.Twisted
+
+        Pyjo.Reactor.Twisted.install()
+
+        from twisted.internet import reactor
+    """
+    if 'twisted.internet.reactor' in sys.modules:
+        return
     if sys.platform != 'darwin' and hasattr(select, 'poll'):
         from twisted.internet import pollreactor
 
