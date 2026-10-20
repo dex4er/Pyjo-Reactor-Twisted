@@ -128,8 +128,44 @@ $ python examples/user_agent_twisted.py
 200 Hello from Twisted!
 ```
 
-Both call `Pyjo.Reactor.Twisted.install()` before they import Twisted, which
-would install its default, epoll on Linux, in the place of poll or select.
+`examples/loopback_twisted.py` is a server of Pyjoyment and its user agent on
+the reactor of Twisted, a blocking request, which runs the event loop until
+the response, and the class of the reactor, which Build checks with the wheel:
+
+```python
+import os
+
+
+# The reactor of Pyjoyment on the reactor of Twisted, selected before Pyjo.IOLoop is loaded
+os.environ['PYJO_REACTOR'] = 'Pyjo.Reactor.Twisted'
+
+import Pyjo.HelloWorld  # noqa: E402
+import Pyjo.IOLoop  # noqa: E402
+import Pyjo.Server.Daemon  # noqa: E402
+import Pyjo.UserAgent  # noqa: E402
+
+
+# The server, on a port that the system picks, and the user agent, in the same event loop, which close their sockets at
+# the end of the block
+with (
+    Pyjo.Server.Daemon.new(app=Pyjo.HelloWorld.new(), listen=['http://127.0.0.1'], silent=True) as daemon,
+    Pyjo.UserAgent.new(ioloop=Pyjo.IOLoop.singleton) as ua,
+):
+    # A blocking request, which runs the event loop of the server on the reactor of Twisted until the response
+    tx = ua.get(f'http://127.0.0.1:{daemon.start().ports()[0]}/')
+    print(type(Pyjo.IOLoop.singleton.reactor).__name__)
+    print(tx.result.code, tx.result.text)
+```
+
+```console
+$ python examples/loopback_twisted.py
+Pyjo_Reactor_Twisted
+200 Your Pyjo is working!
+```
+
+The first two call `Pyjo.Reactor.Twisted.install()` before they import
+Twisted, which would install its default, epoll on Linux, in the place of poll
+or select; the third does not import Twisted, so the reactor installs it.
 
 ## Status
 
