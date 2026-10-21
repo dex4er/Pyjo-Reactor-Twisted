@@ -44,6 +44,16 @@ del reactor
 gc.collect()
 is_ok(type(Pyjo.Reactor.Twisted.new()), Pyjo.Reactor.Twisted.object, 'right object')
 gc.collect()
+# Not in Mojolicious: the constructor of Python, which falls back to Pyjo.Reactor.Poll as new does
+is_ok(Pyjo.Reactor.Twisted.Twisted, Pyjo.Reactor.Twisted.object, 'right class')
+reactor = Pyjo.Reactor.Twisted.Twisted()
+is_ok(type(reactor), Pyjo.Reactor.Twisted.object, 'right object')
+is_ok(type(Pyjo.Reactor.Twisted.Twisted()), Pyjo.Reactor.Poll.object, 'right object')
+is_ok(type(Pyjo.Reactor.Twisted.new()), Pyjo.Reactor.Poll.object, 'right object')
+del reactor
+gc.collect()
+is_ok(type(Pyjo.Reactor.Twisted.Twisted()), Pyjo.Reactor.Twisted.object, 'right object')
+gc.collect()
 ok(not load_class('Pyjo.IOLoop'), 'use Pyjo.IOLoop')
 reactor = Pyjo.IOLoop.singleton.reactor
 is_ok(type(reactor), Pyjo.Reactor.Twisted.object, 'right object')

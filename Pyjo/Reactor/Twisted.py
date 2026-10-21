@@ -3,6 +3,16 @@ Pyjo.Reactor.Twisted - Low-level event reactor with Twisted support
 ===================================================================
 ::
 
+    from Pyjo.Reactor.Twisted import Twisted
+
+    # Watch if handle becomes readable or writable
+    reactor = Twisted()
+    reactor.io(first, lambda reactor, writable: print(
+        'First handle is writable' if writable else 'First handle is readable'
+    ))
+
+    # Or import the module, as in Google Python Style Guide
+
     import Pyjo.Reactor.Twisted
 
     # Watch if handle becomes readable or writable
@@ -47,7 +57,8 @@ calls :func:`install` before, which installs the one of poll or select.
 
 The reactor of Twisted is unique in a process, so only one object of this
 class uses it at a time, and :meth:`~Pyjo_Reactor_Twisted.new` returns a
-:mod:`Pyjo.Reactor.Poll` object while it lives. It runs in the thread that
+:mod:`Pyjo.Reactor.Poll` object while it lives, as the constructor of the
+class does. It runs in the thread that
 made it, so the threads of :mod:`Pyjo.Server.Prethread` get
 :mod:`Pyjo.Reactor.Poll` objects. When the reactor of Twisted is running
 already, as under ``twistd`` or Scrapy, :meth:`~Pyjo_Reactor_Twisted.start`
@@ -111,6 +122,13 @@ class Pyjo_Reactor_Twisted(Pyjo.Reactor.Poll.object):
 
     _timers: dict[str, _Timer]  # pyright: ignore[reportIncompatibleVariableOverride]
 
+    # We have to fall back to Pyjo.Reactor.Poll, since the reactor of Twisted is unique; in the constructor of the class,
+    # as new and the constructor make the same object, and Python does not call __init__ for an object of another class
+    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+        if _active is not None and _active() is not None:
+            return Pyjo.Reactor.Poll.new(*args, **kwargs)
+        return super().__new__(cls)
+
     @classmethod
     def new(cls, *args: Any, **kwargs: Any) -> Any:  # pyright: ignore[reportIncompatibleMethodOverride]
         """::
@@ -121,9 +139,6 @@ class Pyjo_Reactor_Twisted(Pyjo.Reactor.Poll.object):
         :mod:`Pyjo.Reactor.Poll` object while another one uses the reactor of
         Twisted.
         """
-        # We have to fall back to Pyjo.Reactor.Poll, since the reactor of Twisted is unique
-        if _active is not None and _active() is not None:
-            return Pyjo.Reactor.Poll.new(*args, **kwargs)
         return cls(*args, **kwargs)
 
     def __init__(self) -> None:
@@ -455,3 +470,4 @@ if hasattr(os, 'register_at_fork'):
 
 new = Pyjo_Reactor_Twisted.new
 object = Pyjo_Reactor_Twisted
+Twisted = Pyjo_Reactor_Twisted

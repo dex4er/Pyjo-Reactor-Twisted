@@ -15,7 +15,10 @@ dependencies of another. The conventions are those of Pyjoyment: read its
   (`addReader`, `addWriter`), the timers calls of `callLater`.
 - The reactor of Twisted is unique in a process, as the default loop of EV, so
   `new()` returns a `Pyjo.Reactor.Poll` object while another object uses it,
-  as `Mojo::Reactor::EV->new` does.
+  as `Mojo::Reactor::EV->new` does. The fallback is in `__new__`, so that the
+  constructor of the class, `Twisted()`, makes the same object as `new()`, as
+  Pyjoyment has it: Python does not call `__init__` for an object of another
+  class, which `Pyjo.Reactor.Poll.new()` makes whole.
 - `reactor.run()` of Twisted cannot run a second time, so `one_tick` runs
   `runUntilCurrent()` and one `doIteration()` of Twisted, and `start` repeats
   `one_tick`, as `Pyjo.Reactor.Poll` does. While the reactor of Twisted runs,
@@ -100,3 +103,5 @@ mise exec -- uv run --group docs --with-editable ../Pyjoyment sphinx-build -W --
 `t/Reactor_Twisted.py` is the port of `t/mojo/reactor_ev.t` of Mojolicious
 9.49, from `t/Pyjo/Reactor_Poll.py` of Pyjoyment, with the differences of
 `reactor_ev.t`.
+`t/docs/Reactor_Twisted.py` runs the synopsis of the module, in both forms, as
+`t/docs` of Pyjoyment does.
