@@ -22,7 +22,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/dex4er/Pyjo-Reactor-Twisted"
-Documentation = "https://pyjo-reactor-twisted.readthedocs.io/"
+Documentation = "https://pyjoyment.readthedocs.io/projects/pyjo-reactor-twisted/en/latest/"
 
 # Sphinx of docs/, which Read the Docs and the workflow Docs install with uv sync --group docs
 [dependency-groups]

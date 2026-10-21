@@ -1,4 +1,17 @@
+[![Home](https://img.shields.io/badge/%F0%9F%8F%A0-Pyjoyment-02a7a0)](https://github.com/dex4er/Pyjoyment)
+[![GitHub](https://img.shields.io/github/stars/dex4er/Pyjo-Reactor-Twisted?style=flat&label=GitHub%20%E2%AD%90&logo=github)](https://github.com/dex4er/Pyjo-Reactor-Twisted)
+[![Documentation](https://img.shields.io/badge/docs-Read_the_Docs-blue?logo=readthedocs&logoColor=white)](https://pyjoyment.readthedocs.io/projects/pyjo-reactor-twisted/en/latest/)
+[![License](https://img.shields.io/github/license/dex4er/Pyjo-Reactor-Twisted.svg)](https://github.com/dex4er/Pyjo-Reactor-Twisted/blob/main/LICENSE)
+[![Tests](https://github.com/dex4er/Pyjo-Reactor-Twisted/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/dex4er/Pyjo-Reactor-Twisted/actions/workflows/tests.yaml)
+
 # Pyjo-Reactor-Twisted
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/dex4er/Pyjoyment/master/Pyjoyment/resources/public/pyjo/logo-white-4x.png">
+    <img src="https://raw.githubusercontent.com/dex4er/Pyjoyment/master/Pyjoyment/resources/public/pyjo/logo-black-4x.png" alt="Pyjoyment" width="322">
+  </picture>
+</p>
 
 Low level event reactor with [Twisted](https://twisted.org) support for
 [Pyjoyment](https://github.com/dex4er/Pyjoyment).
@@ -170,7 +183,7 @@ or select; the third does not import Twisted, so the reactor installs it.
 ## Documentation
 
 The API of the module and the examples are on
-[Read the Docs](https://pyjo-reactor-twisted.readthedocs.io/).
+[Read the Docs](https://pyjoyment.readthedocs.io/projects/pyjo-reactor-twisted/en/latest/).
 
 ## Status
 
