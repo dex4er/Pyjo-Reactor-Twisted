@@ -3,8 +3,10 @@
 import Pyjo.Reactor.Twisted
 
 import functools
+import importlib.util
 import inspect
 import os
+import re
 import subprocess
 import sys
 import tomllib
@@ -36,6 +38,8 @@ COMMIT = (
     or 'main'
 )
 
+SOURCE = f'https://github.com/dex4er/Pyjo-Reactor-Twisted/blob/{COMMIT}'
+
 
 # The link [source] of a class, a function or a method goes to the lines of its source on GitHub; an object of
 # Pyjoyment, as a method that the class inherits, has none, as its source is not in this repository
@@ -58,7 +62,7 @@ def linkcode_resolve(domain, info):
     if not path or not os.path.abspath(path).startswith(ROOT + os.sep):
         return None
     file = os.path.relpath(path, ROOT).replace(os.sep, '/')
-    return f'https://github.com/dex4er/Pyjo-Reactor-Twisted/blob/{COMMIT}/{file}#L{start}-L{start + len(lines) - 1}'
+    return f'{SOURCE}/{file}#L{start}-L{start + len(lines) - 1}'
 
 
 # A class under a second name, as `object`, or a method of the class as a function of the module, as `new`, is an alias
@@ -69,8 +73,23 @@ def skip_alias(app, what, name, obj, skip, options):
     return None
 
 
+# The link "Page source" goes to the file on GitHub: the module of a page of its API, as the page itself is mostly the
+# directive that documents it, or the page itself, rendered, where the theme links to its text in _sources
+def source_link(app, pagename, templatename, context, doctree):
+    if not context.get('sourcename'):
+        return
+    path = app.env.doc2path(pagename)
+    automodule = re.search(r'^\.\. automodule:: (\S+)', path.read_text('UTF-8'), re.M)
+    if automodule:
+        path = importlib.util.find_spec(automodule.group(1)).origin
+    url = f'{SOURCE}/{os.path.relpath(path, ROOT).replace(os.sep, "/")}'
+    pathto, sources = context['pathto'], '_sources/' + context['sourcename']
+    context['pathto'] = lambda uri, *args, **kwargs: url if uri == sources else pathto(uri, *args, **kwargs)
+
+
 def setup(app):
     app.connect('autodoc-skip-member', skip_alias)
+    app.connect('html-page-context', source_link)
 
 
 # The table of contents lists the page, not the classes and functions that autodoc documents on it.
