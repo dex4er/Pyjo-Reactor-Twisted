@@ -8,8 +8,8 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/dex4er/Pyjoyment/master/Pyjoyment/resources/public/pyjo/logo-white-4x.png">
-    <img src="https://raw.githubusercontent.com/dex4er/Pyjoyment/master/Pyjoyment/resources/public/pyjo/logo-black-4x.png" alt="Pyjoyment" width="322">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/dex4er/Pyjoyment/main/Pyjoyment/resources/public/pyjo/logo-white-4x.png">
+    <img src="https://raw.githubusercontent.com/dex4er/Pyjoyment/main/Pyjoyment/resources/public/pyjo/logo-black-4x.png" alt="Pyjoyment" width="322">
   </picture>
 </p>
 
