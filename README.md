@@ -167,6 +167,11 @@ The first two call `Pyjo.Reactor.Twisted.install()` before they import
 Twisted, which would install its default, epoll on Linux, in the place of poll
 or select; the third does not import Twisted, so the reactor installs it.
 
+## Documentation
+
+The API of the module and the examples are on
+[Read the Docs](https://pyjo-reactor-twisted.readthedocs.io/).
+
 ## Status
 
 An experiment: the first reactor of Pyjoyment in a distribution of its own.

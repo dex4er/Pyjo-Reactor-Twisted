@@ -78,9 +78,24 @@ trunk check --all
 Its pyright needs the environment of `uv sync`, `.venv`, which `tool.pyright` of
 `pyproject.toml` names, as the reactor imports Pyjoyment and Twisted, while
 Pyjoyment has no dependencies to find; Trunk Check of CI runs `uv sync` first.
-The examples and the tests are not checked by pyright: for them it takes the
+The examples and the tests, and `docs/conf.py`, are not checked by pyright: for them it takes the
 regular package `Pyjo` of Pyjoyment, which hides `Pyjo.Reactor.Twisted` of the
 checkout.
+
+The documentation is one page, `docs/index.rst`: the docstrings of the
+module, which autodoc imports, and the examples from `examples/`, included,
+never copied, as in Pyjoyment. Read the Docs installs it with `uv sync` of `uv.lock` and the
+group `docs`, not with pip and a `docs/requirements.txt` as Pyjoyment does:
+pip does not read `[tool.uv.sources]`, so it would take Pyjoyment from PyPI.
+The links to the modules of Pyjoyment come from intersphinx. The examples are
+a rubric, not a section: they follow the docstring of the module, whose
+sections are its own, so that a section would be a second title of the page.
+The workflow Docs builds it with `-W`, as Read the Docs does, with the
+Pyjoyment of `uv.lock`:
+
+```sh
+mise exec -- uv run --group docs --with-editable ../Pyjoyment sphinx-build -W --keep-going -b html docs docs/_build/html
+```
 
 `t/Reactor_Twisted.py` is the port of `t/mojo/reactor_ev.t` of Mojolicious
 9.49, from `t/Pyjo/Reactor_Poll.py` of Pyjoyment, with the differences of
