@@ -2,8 +2,11 @@
 
 import Pyjo.Reactor.Twisted
 
+import functools
 import inspect
 import os
+import subprocess
+import sys
 import tomllib
 
 
@@ -19,12 +22,43 @@ author = ', '.join(a['name'] for a in PROJECT['authors'])
 copyright = f'2026, {author}'
 version = release = Pyjo.Reactor.Twisted.__version__
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.linkcode']
 
 # The modules of Pyjoyment, as Pyjo.Reactor.Poll, are links to its documentation
 intersphinx_mapping = {
     'pyjoyment': ('https://pyjoyment.readthedocs.io/en/latest/', None),
 }
+
+# The commit that the links to the source point to: the one that Read the Docs builds, or the one of the checkout
+COMMIT = (
+    os.environ.get('READTHEDOCS_GIT_COMMIT_HASH')
+    or subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    or 'main'
+)
+
+
+# The link [source] of a class, a function or a method goes to the lines of its source on GitHub; an object of
+# Pyjoyment, as a method that the class inherits, has none, as its source is not in this repository
+def linkcode_resolve(domain, info):
+    if domain != 'py' or not info['module']:
+        return None
+    obj = sys.modules.get(info['module'])
+    for part in info['fullname'].split('.'):
+        obj = getattr(obj, part, None)
+    if isinstance(obj, property):
+        obj = obj.fget
+    elif isinstance(obj, functools.cached_property):
+        obj = obj.func
+    try:
+        obj = inspect.unwrap(obj)
+        path = inspect.getsourcefile(obj)
+        lines, start = inspect.getsourcelines(obj)
+    except (TypeError, OSError, ValueError):
+        return None
+    if not path or not os.path.abspath(path).startswith(ROOT + os.sep):
+        return None
+    file = os.path.relpath(path, ROOT).replace(os.sep, '/')
+    return f'https://github.com/dex4er/Pyjo-Reactor-Twisted/blob/{COMMIT}/{file}#L{start}-L{start + len(lines) - 1}'
 
 
 # A class under a second name, as `object`, or a method of the class as a function of the module, as `new`, is an alias
