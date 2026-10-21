@@ -49,6 +49,11 @@ html_theme_options = {
     'github_user': 'dex4er',
     'github_repo': 'Pyjo-Reactor-Twisted',
     'show_powered_by': False,
+    # The way back to the documentation of Pyjoyment, whose project this one is a subproject of on Read the Docs
+    'extra_nav_links': {
+        'Pyjoyment': 'https://pyjoyment.readthedocs.io/en/latest/',
+        'Distributions': 'https://pyjoyment.readthedocs.io/en/latest/distributions.html',
+    },
     # The sans-serif font of the system, where Alabaster has Georgia, as in Pyjoyment
     'font_family': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
     'head_font_family': "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
