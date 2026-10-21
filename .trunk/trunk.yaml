@@ -53,12 +53,13 @@ lint:
         - yamlfmt
       paths:
         - .trunk/trunk.yaml
-    # Examples and tests, outside the package: pyright takes the regular
-    # package Pyjo of Pyjoyment for them, which hides Pyjo.Reactor.Twisted of
-    # the checkout; the module itself is checked, strictly
+    # Examples, tests and docs/conf.py, outside the package: pyright takes
+    # the regular package Pyjo of Pyjoyment for them, which hides
+    # Pyjo.Reactor.Twisted of the checkout; the module itself is checked, strictly
     - linters:
         - pyright
       paths:
+        - docs/**
         - examples/**
         - t/**
 actions:

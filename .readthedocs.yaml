@@ -1,0 +1,19 @@
+# Read the Docs configuration: https://docs.readthedocs.com/platform/stable/config-file/v2.html
+version: 2
+
+build:
+  os: ubuntu-26.04
+  tools:
+    python: "3.14"
+
+sphinx:
+  configuration: docs/conf.py
+
+# uv sync of uv.lock, with Pyjoyment of its Git repository and Twisted, which autodoc imports, and Sphinx of the group
+# docs: pip would take Pyjoyment from PyPI, as it does not read tool.uv.sources
+python:
+  install:
+    - method: uv
+      command: sync
+      groups:
+        - docs

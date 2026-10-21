@@ -22,6 +22,11 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/dex4er/Pyjo-Reactor-Twisted"
+Documentation = "https://pyjo-reactor-twisted.readthedocs.io/"
+
+# Sphinx of docs/, which Read the Docs and the workflow Docs install with uv sync --group docs
+[dependency-groups]
+docs = ["sphinx>=9.1.1"]
 
 # Pyjoyment of its Git repository, as its revival is not on PyPI yet; a path to the checkout next to this one would be a
 # subdirectory of this repository for whoever installs it from Git, as uv applies the sources of a dependency of Git
@@ -37,7 +42,15 @@ only-include = ["Pyjo/Reactor/Twisted.py"]
 
 # The files of the distribution, as in Pyjoyment, and not the files of the tools, as .trunk
 [tool.hatch.build.targets.sdist]
-include = ["/Pyjo", "/t", "/examples", "/.proverc", "/LICENSE", "/README.md"]
+include = [
+  "/Pyjo",
+  "/t",
+  "/examples",
+  "/docs",
+  "/.proverc",
+  "/LICENSE",
+  "/README.md",
+]
 
 [tool.ruff]
 line-length = 120
