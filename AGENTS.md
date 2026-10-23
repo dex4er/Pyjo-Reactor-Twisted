@@ -78,6 +78,11 @@ Trunk checks the files with the linters of Pyjoyment, from `.trunk/trunk.yaml`:
 trunk check --all
 ```
 
+actionlint is the one of the maintained fork kjanat/actionlint, whose releases
+continue those of rhysd/actionlint after 1.7.12, as in Pyjoyment: `downloads`
+in `.trunk/trunk.yaml` replaces the URLs of the plugin with those of the fork,
+whose files have the same names.
+
 Its pyright needs the environment of `uv sync`, `.venv`, which `tool.pyright` of
 `pyproject.toml` names, as the reactor imports Pyjoyment and Twisted, while
 Pyjoyment has no dependencies to find; Trunk Check of CI runs `uv sync` first.
