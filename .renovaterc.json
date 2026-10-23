@@ -26,6 +26,14 @@
     "schedule": ["at any time"],
     "automerge": true
   },
+  "packageRules": [
+    {
+      "description": "requires-python of pyproject.toml is the lowest Python that the distribution supports, on purpose, not the Python of mise.toml, so rangeStrategy bump must not raise it.",
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["requires-python"],
+      "enabled": false
+    }
+  ],
   "customManagers": [
     {
       "description": "Renovate hints in a comment after the version.",
