@@ -262,7 +262,7 @@ class Pyjo_Reactor_Twisted(Pyjo.Reactor.Poll.object):
         _release(self._twisted, self._descriptors, self._timers)
         self._events = {}
         self._io = {}
-        self._next_tick = []
+        self._next_tick.clear()
         self._next_timer = None
         self._running = 0
 
